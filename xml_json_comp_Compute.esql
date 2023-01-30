@@ -1,0 +1,28 @@
+BROKER SCHEMA com.nkp.training
+
+
+CREATE COMPUTE MODULE xml_json_comp_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		CREATE LASTCHILD OF OutputRoot DOMAIN('JSON');
+		CREATE FIELD OutputRoot.JSON.Data;
+		DECLARE outRef REFERENCE TO OutputRoot.JSON.Data;
+		CREATE FIELD outRef.PrimeCustomer IDENTITY (JSON.Array)PrimeCustomer;
+		
+		DECLARE I INTEGER 1;
+		DECLARE inRef REFERENCE TO InputRoot.XMLNSC.shoppingCart.Customer[1];
+		WHILE (LASTMOVE(inRef)) DO
+			
+			SET outRef.PrimeCustomer.Item[I].ID = inRef.(XMLNSC.Attribute)ID;
+			SET outRef.PrimeCustomer.Item[I].Amount = inRef.amount;
+			SET outRef.PrimeCustomer.Item[I].paymentType = inRef.paymentType;
+			SET I = I + 1;
+			MOVE inRef NEXTSIBLING;
+		END WHILE;
+		
+		RETURN TRUE;
+	END;
+
+	
+END MODULE;
